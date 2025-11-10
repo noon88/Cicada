@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cicada — Stage 1</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Cicada — Stage 1</h1>
+      <div class="small">Decifre a cifra e digite a resposta para abrir a próxima etapa.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Pista</h2>
+    <pre class="puzzle" id="puzzle1"></pre>
+
+    <div class="input-row">
+      <input id="answer1" type="text" placeholder="Digite a resposta completa (normalized)">
+      <button id="send1" class="btn">Enviar</button>
+    </div>
+
+    <div id="msg1" class="alert" style="display:none"></div>
+
+    
+  </div>
+
+  <div class="footer">Abra as páginas localmente. Você será levado à próxima etapa se acertar.</div>
+</div>
+
+<script>
+// conteúdo da pista (César)
+const cipherText = (function(){
+  // frase plain: "procure a pedra no velho moinho"
+  // shift aplicado: 7 (exemplo) -> crypted
+  const shift=7;
+  const plain = "procure a pedra no velho moinho";
+  function caesar(s, shift){
+    return s.split('').map(ch=>{
+      if(ch>='a' && ch<='z') return String.fromCharCode((ch.charCodeAt(0)-97+shift)%26+97);
+      if(ch>='A' && ch<='Z') return String.fromCharCode((ch.charCodeAt(0)-65+shift)%26+65);
+      return ch;
+    }).join('');
+  }
+  return caesar(plain, shift);
+})();
+document.getElementById('puzzle1').textContent = cipherText;
+
+// hash esperado (sha256 da resposta normalizada)
+// resposta plain: "procure a pedra no velho moinho"
+// precomputado (normalize = trim + collapse spaces + lowercase)
+const expectedHash = "3db4420f0a44859d31db1752b3c3940a1ba5626f67b2ae0c1ead157b302f8157";
+
+// util normalize
+function normalizeInput(s){ return s.trim().toLowerCase().replace(/\s+/g,' '); }
+
+// hash func (uso Web Crypto API)
+async function sha256hex(msg){
+  const enc = new TextEncoder();
+  const data = enc.encode(msg);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const bytes = Array.from(new Uint8Array(hash));
+  return bytes.map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+document.getElementById('send1').onclick = async ()=>{
+  const v = normalizeInput(document.getElementById('answer1').value);
+  if(!v){ showMsg("Digite algo."); return; }
+  const h = await sha256hex(v);
+  if(h === expectedHash){
+    // correto -> abrir stage2.html
+    window.location.href = "stage2.html";
+  } else {
+    showMsg("Resposta errada. Tente novamente.");
+  }
+};
+
+function showMsg(text){ const el=document.getElementById('msg1'); el.style.display='block'; el.textContent=text; setTimeout(()=>el.style.display='none',2500); }
+</script>
+</body>
+</html>
