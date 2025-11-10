@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Cicada — Final</title>
+<link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="container">
+  <div class="card">
+    <h2>PARABÉNS</h2>
+    <p class="small">Você completou todas as etapas. Mensagem final:</p>
+    <pre class="puzzle" id="finalMsg"></pre>
+    <p class="small">QR code (abra em nova aba): <a href="qr_final.html" target="_blank">Abrir QR Final</a></p>
+    <div style="margin-top:10px">
+      <a href="stage1.html" class="small">Jogar de novo</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// final message (same as used before)
+const finalPlain = "PARABENS! A frase final é: 'NO CANTO DA PEDRA'";
+// show
+document.getElementById('finalMsg').textContent = finalPlain;
+// QR via Google Chart
+const qrURL = "https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=" + encodeURIComponent(finalPlain);
+const a = document.getElementById('qr'); a.href = qrURL; a.textContent = "Abrir QR final";
+</script>
+</body>
+</html>

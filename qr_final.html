@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Tela Final Cicada</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url('logo_cicada.png') no-repeat center center;
+    background-size: contain; /* mantém proporção do logo */
+    background-color: #000; /* cor de fundo caso logo seja transparente */
+    flex-direction: column;
+    font-family: sans-serif;
+    color: white;
+  }
+
+  #qrcode-container {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  #qrcode {
+    margin: 0 auto;
+  }
+
+  .instruction {
+    margin-top: 15px;
+    font-size: 18px;
+  }
+
+  a.open-link {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: rgba(18, 103, 0, 1);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: 0.3s;
+  }
+
+  a.open-link:hover {
+    background: rgb(from color: green; r g b);
+  }
+</style>
+</head>
+<body>
+
+<h1>Parabéns! Você chegou ao final.</h1>
+
+<div id="qrcode-container">
+  <div id="qrcode"></div>
+  <div class="instruction">Abra o QR code em uma nova guia:</div>
+  <a class="open-link" href="code.html" target="_blank">Abrir Link</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  var qrcode = new QRCode(document.getElementById("qrcode"), {
+    text: "https://seulink.com",
+    width: 150,
+    height: 150,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+  });
+</script>
+
+</body>
+</html>

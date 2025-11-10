@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>QR Final - Endereço</title>
+<style>
+  body {
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    background: #000;
+    color: #0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  background-image: url(skull.gif);
+  }
+
+  #qrcode {
+    margin-top: 20px;
+    display: inline-block;
+    padding: 20px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 15px;
+    box-shadow: 0 0 20px #0f0;
+    min-width: 220px;
+    min-height: 220px;
+   background-image: url(1.png);
+   background-position: center;
+  }
+
+  #address {
+    margin-top: 18px;
+    font-size: 16px;
+    color: #bfffbf;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,255,0,0.2);
+    max-width: 90%;
+  }
+
+  #open-map {
+    margin-top: 20px;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    background: #0f0;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 15px #0f0;
+    transition: 0.3s;
+  }
+
+  #open-map:hover {
+    background: #0a0;
+    box-shadow: 0 0 25px #0f0;
+  }
+
+  #status {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #88ff88;
+    opacity: 0.9;
+  }
+  
+</style>
+</head>
+<body>
+
+<h1>Seu QR Code Personalizado</h1>
+<p>Aguarde a chegada do drone 🫦😈</p>
+
+<div id="qrcode">Aguardando permissão...</div>
+<div id="address" style="display:none;"></div>
+<div id="status"></div>
+<button id="open-map" style="display:none;">Mostrar endereço completo</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+let userAddress = ""; // armazenará o endereço
+
+function clearQRCode() {
+  const container = document.getElementById("qrcode");
+  container.innerHTML = "";
+}
+
+// Gera QR code com o endereço
+function generateQR(address){
+  clearQRCode();
+  new QRCode(document.getElementById("qrcode"), {
+    text: address,
+    width: 200,
+    height: 200,
+    colorDark : "#000000",
+    colorLight : "#00ff00"
+  });
+
+  const btn = document.getElementById("open-map");
+  btn.style.display = "inline-block";
+  btn.onclick = () => {
+    alert("Seu endereço é:\n" + userAddress);
+  };
+}
+
+// Exibe endereço imediatamente na tela
+function showAddress(address){
+  const el = document.getElementById("address");
+  el.style.display = "block";
+  el.textContent = address;
+}
+
+// Função para obter endereço via OpenStreetMap
+async function getAddress(lat, lon){
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' }});
+    const data = await res.json();
+    return data.display_name || "Endereço não disponível";
+  } catch(e) {
+    console.error(e);
+    return "Erro ao obter endereço";
+  }
+}
+
+// Pede permissão de localização
+if (navigator.geolocation) {
+  document.getElementById("status").textContent = "Solicitando permissão de localização...";
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const lat = pos.coords.latitude.toFixed(5);
+    const lon = pos.coords.longitude.toFixed(5);
+
+    document.getElementById("status").textContent = "Localização obtida.";
+
+    // Obtém endereço rapidamente
+    const address = await getAddress(lat, lon);
+    userAddress = address;
+
+    // Exibe na tela
+    showAddress(address);
+
+    // Gera QR code com o endereço
+    generateQR(address);
+  }, (err) => {
+    document.getElementById("qrcode").textContent = "Não foi possível obter sua localização.";
+    document.getElementById("status").textContent = "Erro: " + err.message;
+    console.error(err);
+  }, { enableHighAccuracy: true, timeout: 10000 });
+} else {
+  document.getElementById("qrcode").textContent = "Geolocalização não suportada neste navegador.";
+  document.getElementById("status").textContent = "";
+}
+</script>
+
+</body>
+</html>

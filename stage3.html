@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cicada — Stage 3</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h2>Stage 3 — Vigenère</h2>
+    
+    <pre class="puzzle" id="puzzle3"></pre>
+
+    <div class="input-row">
+      <input id="answer3" type="text" placeholder="Digite o texto decifrado (inclua 'coordenadas: ...')">
+      <button id="send3" class="btn">Enviar</button>
+    </div>
+    <div id="msg3" class="alert" style="display:none"></div>
+    <div style="margin-top:10px"><a href="stage2.html" class="small">Voltar</a></div>
+  </div>
+</div>
+
+<script>
+// plaintext for stage3: "coordenadas: -8.12345,-36.54321"
+// keyword: "pedra" -> compute Vigenere cipher here for display
+function vigenereEncrypt(plaintext, key){
+  let ks = key.toLowerCase().replace(/[^a-z]/g,'').split('').map(c=>c.charCodeAt(0)-97);
+  let out='', ki=0;
+  for(let ch of plaintext){
+    if(ch>='a' && ch<='z'){
+      let k=ks[ki%ks.length];
+      out += String.fromCharCode((ch.charCodeAt(0)-97 + k)%26 + 97);
+      ki++;
+    } else if(ch>='A' && ch<='Z'){
+      let k=ks[ki%ks.length];
+      out += String.fromCharCode((ch.charCodeAt(0)-65 + k)%26 + 65);
+      ki++;
+    } else out += ch;
+  }
+  return out;
+}
+const keyword = "pedra";
+const plain3 = "coordenadas: -8.12345,-36.54321";
+const cipher3 = vigenereEncrypt(plain3, keyword);
+document.getElementById('puzzle3').textContent = cipher3;
+
+// expected hash (normalized plain3)
+const expectedHash = "0871c4de1c807d18cc15dc31a67b9b1769aa5932e750f16cfd02a5a43ee9399b";
+
+function normalizeInput(s){ return s.trim().toLowerCase().replace(/\s+/g,' '); }
+async function sha256hex(msg){
+  const enc = new TextEncoder();
+  const data = enc.encode(msg);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+document.getElementById('send3').onclick = async ()=>{
+  const v = normalizeInput(document.getElementById('answer3').value);
+  if(!v){ showMsg("Digite algo."); return; }
+  const h = await sha256hex(v);
+  if(h === expectedHash){
+    window.location.href = "final.html";
+  } else showMsg("Resposta errada. Tente novamente.");
+};
+function showMsg(text){ const el=document.getElementById('msg3'); el.style.display='block'; el.textContent=text; setTimeout(()=>el.style.display='none',2500); }
+</script>
+</body>
+</html>

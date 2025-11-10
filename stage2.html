@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Cicada — Stage 2</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h2>Stage 2 — Base64</h2>
+    <p class="small">Aqui está um payload em Base64. Decodifique e digite a palavra resultante para avançar.</p>
+    <pre class="puzzle" id="puzzle2"></pre>
+
+    <div class="input-row">
+      <input id="answer2" type="text" placeholder="Digite a palavra (ex: pedra)">
+      <button id="send2" class="btn">Enviar</button>
+    </div>
+    <div id="msg2" class="alert" style="display:none"></div>
+    <div style="margin-top:10px"><a href="index.html" class="small">Voltar</a></div>
+  </div>
+</div>
+
+<script>
+// payload: base64 of "pedra"
+const payloadB64 = "cGVkcmE=";
+document.getElementById('puzzle2').textContent = payloadB64;
+
+// expected hash: "pedra"
+const expectedHash = "dbc83c8a105dfd206c5348f583b8736aeb9693c4a7fa4682c169a3b1dfc5a35d";
+
+function normalizeInput(s){ return s.trim().toLowerCase().replace(/\s+/g,' '); }
+async function sha256hex(msg){
+  const enc = new TextEncoder();
+  const data = enc.encode(msg);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+document.getElementById('send2').onclick = async ()=>{
+  const v = normalizeInput(document.getElementById('answer2').value);
+  if(!v){ showMsg("Digite algo."); return; }
+  const h = await sha256hex(v);
+  if(h === expectedHash){
+    window.location.href = "stage3.html";
+  } else showMsg("Resposta errada. Tente novamente.");
+};
+function showMsg(text){ const el=document.getElementById('msg2'); el.style.display='block'; el.textContent=text; setTimeout(()=>el.style.display='none',2500); }
+</script>
+</body>
+</html>
